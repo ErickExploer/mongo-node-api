@@ -2,16 +2,17 @@
 
 const express = require('express');
 const mongoose = require("mongoose");
+const cors = require("cors"); // <--- Importa el módulo cors
 const app = express();
-const port = process.env.PORT || 9000; // Cambia 9000 a otro puerto, como 9001
-const path = require ("path")
+const port = process.env.PORT || 9000;
+const path = require("path");
 require("dotenv").config();
 
 const deudasRoutes = require("./routes/deudas");
 const recordPagosRoutes = require("./routes/recordpagos");
 
-//swager
-const swagerUI=require("swagger-ui-express");
+//swagger
+const swagerUI = require("swagger-ui-express");
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerSpec = {
   definition: {
@@ -22,21 +23,23 @@ const swaggerSpec = {
     },
     servers: [
       {
-        url: "http://34.232.98.170:8000", // Cambia "localhost" a tu IP pública de AWS
+        url: "http://34.232.98.170", // Cambia "http://" antes de "localhost"
       },
     ],
   },
   apis: [`${path.join(__dirname, "./routes/*.js")}`],
 };
 
-
 // Middleware para analizar JSON en las solicitudes
 app.use(express.json());
+
+// Configurar CORS para permitir solicitudes desde localhost:5173
+app.use(cors({ origin: 'http://localhost:5173' }));
 
 // Usar las rutas de Deudas y RecordPagos con el prefijo `/api`
 app.use('/api', deudasRoutes);
 app.use('/api', recordPagosRoutes);
-app.use("/api-doc",swagerUI.serve,swagerUI.setup(swaggerJSDoc(swaggerSpec)))
+app.use("/api-doc", swagerUI.serve, swagerUI.setup(swaggerJSDoc(swaggerSpec)));
 
 // Ruta principal
 app.get('/', (req, res) => {
